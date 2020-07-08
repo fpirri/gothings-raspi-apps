@@ -22,7 +22,7 @@ Anyway, the original work included may be used according to the permissible MIT 
 # DISCLAIMER
 As commonplace in github, the project may include other work which may have different licensing terms.  
 The author make his best to note usability and provenience of every work included here.  
-A list of the software that inspired this work is reported in the [ACKNOWLEDGEMENT](https://github.com/fpirri/gothings-raspi-apps/blob/master/ACKNOWLEDGEMENT.md) section.  
+A list of the software that inspired this work is reported in the [ACKNOWLEDGEMENT](https://raw.githubusercontent.com/fpirri/gothings-raspi-apps/master/ACKNOWLEDGEMENT.md) section.  
   
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
