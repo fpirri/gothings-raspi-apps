@@ -1,0 +1,128 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI GENERIC FUNCTIONS
+                                                    generic-functions-ver="0.01"
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+#===============================================================================
+#
+#  Funzioni generiche, utili nelle varie configurazioni
+#    --> ... per interfacciarsi con il repo github
+#    --> ... per la lettura di file .json
+#    --> ...
+#
+#==============================================================================
+echo
+echo "    ----> go raspi generic functions - v.${generic-functions-ver}"
+echo "--> define useful generic functions"
+#
+#
+##########################################################################
+getgitfile(){    # Lettura file da github
+  #
+  # Verify file existence, get it from github if not
+  #    eventually, make it executable  (input var $4=="EXEC")
+  #
+  #  use globals:
+  #    DEBUGLOG=""     # utile nel debug
+  #    ITEXISTS=0      #  1 : file esiste    0 : file assente
+  #
+  #  use configuration variables:
+  #    HOMEDIR
+  #    GITHUBHOME
+  #
+  #
+  #     <-- se esiste il file $1 ed ha lunghezza > 0 :
+  #         <-- si va avanti senza altre azioni
+  #     <-- altrimenti si prova a scaricare il file da github               AGGIUSTARE dopo ......
+  #     <-- si riprova il test di lunghezza
+  #         se non funziona si torna con ITEXISTS=0
+  #     
+  # call :    findnodeapp $1 $2 $3 [$4]
+  #   $1 :    "nomefile"
+  #   $2 :    "github project branch"   <-- togliere la 'location'==="https://github.com/fpirri/"
+  #   $3 :    "local path after $HOMEDIR"   <--   local path===github path 
+  #   $4 :    optional input variable, make file executable if value is "EXEC"
+  #        --> attenti alle barre inizio-fine--> $1: no-no ;  $2: no-si ;  $3: no-si
+  # RETURN:
+  #           ITEXISTS = 1 se esiste, 0 altrimenti
+  #####
+  # example:
+  #          getgitfile "gotdirs.tar.gz" "gothings-install/master/" "dockrepo/sysarchive/"
+  #
+  #  bash:  -s file  True if file exists and has a size greater than zero
+  #############################################  DEBUG info:
+  echo "getgitfile() debug info"
+  echo '  $1  nomefile : ' $1
+  echo '  $2  github project branch : ' $2
+  echo '  $3  local path : ' $3
+  echo '  $4  option var : ' $4
+  #####
+  #
+  local filegit githubfile
+  #
+  FILEGIT="${HOMEDIR}$3$1"
+  DEBUGLOG="|| getgitfile() INFO || Il file cercato e': $FILEGIT"
+  if [[ -s $FILEGIT ]]; then
+    ITEXISTS=1    # file exists and length > 0
+    DEBUGLOG="$DEBUGLOG | $FILEGIT esiste |"
+  else            # si prova a scaricarlo
+    githubfile="${GITHUBHOME}$2$3$1"
+    DEBUGLOG="$DEBUGLOG | $FILEGIT does not exist | download githubfile: $githubfile |"
+    wget -O "$FILEGIT" "$githubfile"
+    if [[ -s $FILEGIT ]]; then
+      ITEXISTS=1    # file exists and length > 0
+      DEBUGLOG="$DEBUGLOG | $FILEGIT trovato |"
+      if [ "$4" == "EXEC" ]; then      # option: make it executable
+        chmod +x "$FILEGIT"
+      fi
+    else
+      ITEXISTS=0    # file introvabile !
+      DEBUGLOG="$DEBUGLOG | $FILEGIT introvabile |"
+      echo $DEBUGLOG                               ########### Stampa sempre mentre sviluppo ...
+    fi
+  fi
+  return $ITEXISTS
+}
+#
+##########################################################################
+bugmessage(){
+  # stampa $debuglog ed un avviso di errore
+  #
+  #  $1 :  ERROR oppure WARNING
+  #  $2 :  codice di errore
+  #  stampa piccola storia  <-- debuglog
+  #  $3 :  avviso all'utente, come '... il file xxx e' essenziale ...'
+  echo 
+  echo "------------------------------------------------------"
+  echo -e "${RED} $1 $2 - debug message: ${STD}"
+  echo ${debuglog}
+  echo -e "$3"
+  echo "------------------------------------------------------"
+  echo 
+}
+#
+##########################################################################
+json2string() {
+  # Trasforma valori json da stringa in stringa nulla
+  #   $1    nome variabile da verificare
+  typeset -n ref1=$1 #                    ref1 punta alla variabile json
+  case "$ref1" in #                       check valori anomali --> stringa ""
+    null|true|false)
+      ref1=""
+      echo "null value"
+      return 0
+      ;;
+    *)
+      echo "value: $ref1"
+      return 1
+  esac
+}
+
+
+#
+##########################################################################
+#

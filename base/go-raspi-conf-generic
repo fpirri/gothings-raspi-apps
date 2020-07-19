@@ -1,0 +1,87 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI CONF - GENERIC
+                                                          conf-generic-ver="0.01"
+#    contiene parametri e funzioni invarianti del sistema, usati
+#      da tutti gli script 'go-raspi'
+#    definisce alcune funzioni utili per il terminale bash
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+echo
+echo "    ----> go raspi conf generic - ${conf-generic-ver}"
+echo "--> set universal parameters"
+#
+#===============================================================================
+#
+#  Configurazione iniziale, generica, === per tutti
+#
+#----------------------------------
+# Define menu variables
+#
+EDITOR=nano
+PASSWD=/etc/passwd
+#
+#-----------------   GLOBAL (ri)definibili al runtime
+DEBUGLOG=""
+ERRCODE=""
+ERRFILE=""
+RETLEVEL=0  # 0 : tutto OK; 1+ : situazione non valida ...
+ITEXISTS=0  # 1 se il cercato esiste, 0 altrimenti
+FILE=""     # Nome del file (in fileexists)
+#
+MENUTRAP=0  #  66 : to request exit from main menu, signalling errors
+#
+#
+################################################################################
+#                                                  terminal functions  (generic)
+#
+#
+#########################################################################
+avanti(){
+  # Domanda di continuazione personalizzabile
+  # - aspetta un carattere singolo dalla console
+  # call:    avanti $1
+  #   $1:    "<stringa di domanda>"
+  #
+  echo "----------------------------------------------------------------"
+  read -rsp "$1" -n 1 key
+  echo
+}
+#
+##########################################################################
+pause(){
+  #  Domanda 'continue or exit'
+  avanti 'Press any key to continue or ^C to exit ...'
+}
+#
+##########################################################################
+dots(){
+  # wait $1 seconds, printing dots on the screen
+  #   $1 :  # of seconds to wait
+  local param1
+  printf -v param1 '%d\n' $1 2>/dev/null # converti in intero con tutti i controlli
+  while [ $param1 -gt 0 ]
+  do
+    echo -n "."
+    sleep 0.5
+    echo -n "."
+    sleep 0.5
+    let "--param1"
+  done
+}
+#
+##########################################################################
+notavailable(){
+  #  Funzione prevista, ma ancora DA FARE
+  echo
+  echo "----------------------------------------------------------------"
+  echo "Unfortunately, this function is planned, but not available yet."
+  echo "Please retry later ..."
+  echo
+  dots 3
+}
+#
+##########################################################################
+#

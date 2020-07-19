@@ -1,0 +1,45 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI CONF BASE
+                                                            conf-base-ver="0.01"
+#    contiene parametri usati nella configurazione BASE di 'go-raspi'
+#
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+echo
+echo "    ----> go raspi conf base - v.${conf-base-ver}"
+echo "--> set parameters for the go-raspi base configuration"
+#
+#===============================================================================
+#  Configurazione iniziale della raspberry per l'applicazione base
+#
+# il chiamante definisce le variabili:
+#   USERNAME="pi"
+#   HOMEDIR="/home/${USERNAME}/"
+#
+#  Configurazione variabili gothings raspi
+#
+#----------------------------------
+# Define application variables
+APPNAME="base"
+CONFIGDIR="${HOMEDIR}dockrepo/dockimages/${APPNAME}/"
+SYSDATADIR="${HOMEDIR}dockrepo/sysdata/"
+DISPLAYNAME="Go Raspi"
+#
+# da riguardare:
+#  DIRSDIR="dockrepo/dockimages/dirs/"   <-- sostituito da 
+
+#  INSTALLDIR="???"                      #  in go-raspi:  sostituisce INSTALLDIR
+#  FILEEXPAND="${INSTALLDIR}${APPNAME}/${APPNAME}expand.json"       #  file di configurazione della fase expand
+#  FILEINIT="${INSTALLDIR}${APPNAME}/${APPNAME}init.json"
+#  FILEINSTALL="${INSTALLDIR}${APPNAME}/${APPNAME}install.json"
+#
+#-----------------   github globals
+GITHUBHOME="https://raw.githubusercontent.com/fpirri/" #      :   prefisso per i progetti fpirri su github
+#
+#  GITHUBPATH  :  gothings-raspi-apps/blob/master/            :   repository da scaricare        $2
+#  LOCALPATH   :  dockrepo/dockimages/cloud/                  :   path del file                  $3
+#

@@ -1,0 +1,104 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI MENU BASE
+                                                            menu-base-ver="0.01"
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+#===============================================================================
+#
+#  Esecuzione del menu principale
+#
+#==============================================================================
+echo
+echo "    ----> go raspi base menu"
+#
+##########################################################################
+# function to display menus
+show_menus() {
+  clear
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ${MENUTAG}"
+  echo
+  echo "       G O - R A S P I  B A S E   M E N U"
+  echo
+  echo -n "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  (hostname)
+  echo
+  echo "1. SHOW      container's status v.${menu-base-ver}"
+  echo "2. BASE      manage gothings base containers"
+  echo "3. NODEDEV   manage a development node.js container"
+  echo "   ---"
+  #echo "4. "
+  #echo "5. "
+  #echo "6. "
+  #echo "7. USER      manage user containers"
+  #echo "8. UPDATE    this menu"
+  echo "9. TERM      open bash terminal"
+  echo "0. EXIT      return to bash console"
+}
+#
+# read input from the keyboard and take a action
+# invoke the function according to the entered number
+read_options(){
+	local choice
+  read -rsp $'Enter choice [ 1..9 or ^C to exit ] ' -n 1 choice
+  case "$choice" in
+      1) showcontainers;;
+      2) gothingsbase;;
+      3) notavailable;;
+      4) notavailable;;
+      5) notavailable;;
+      6) notavailable;;
+      7) notavailable;;
+      8) notavailable;;  #updatemenu;;
+      9) terminal;;
+      0) consoleexit;;
+      *) echo -e "${RED}Error...${STD}" && sleep 2
+  esac
+}
+# ----------------------------------------------
+# Step #3: Trap CTRL+C, CTRL+Z and quit singles
+# ----------------------------------------------
+trap '' SIGQUIT SIGTSTP
+#trap '' SIGINT SIGQUIT SIGTSTP
+#
+# -----------------------------------
+# Step #4: Main logic - infinite loop
+# ------------------------------------
+#
+while true
+do
+  # internal trap
+  if [[ ${MENUTRAP} -eq 67 ]]
+  then
+    echo "----------------------------------------------------------------"
+    echo "GOTHINGS Control Menu was downloaded from github,"
+    echo "You can re-execute it by typing './go-raspi' at the console"
+    echo "----------------------------------------------------------------"
+    echo
+    break  #-- stop menu
+  fi
+  if [[ ${MENUTRAP} -gt 66 ]]
+  then
+    echo 
+    echo "----------------------------------------------------------------"
+    echo " Are you sure that all necessary software was correctly loaded ?"
+    echo
+    echo " Please verify content of all JSON configuration files"
+    echo
+    echo " Please note that a working internet connection is needed to"
+    echo " dinamically update software during the first istallation and"
+    echo " during updates"
+    echo "----------------------------------------------------------------"
+    echo
+    break  #-- stop menu
+  fi
+	show_menus
+	read_options
+done
+echo
+echo "Shell terminated."
+echo
+#

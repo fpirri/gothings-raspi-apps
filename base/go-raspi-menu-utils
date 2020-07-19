@@ -1,0 +1,52 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI MENU UTILS
+                                                           menu-utils-ver="0.01"
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+#===============================================================================
+#
+#  Configurazione generica che potrebbe richiedere aggiustamenti
+#
+#==============================================================================
+echo
+echo "    ----> go raspi menu utils - v${menu-utils-ver}"
+#
+##########################################################################
+#                                2nd level functions called from main menu
+#
+#
+##########################################################################
+showsubtitle(){
+  # 1. SHOW submenu header
+  #
+  # call:    showsubtitle $1
+  #    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  # $1:"         Sub menu title"
+  #
+  clear
+  echo 
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "$1"
+  echo -n "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  (hostname)
+}
+#
+##########################################################################
+startbase() {
+  #  Start
+            echo
+            echo
+            echo "---------------------------------------------------------"
+            echo "Use docker-compose to START the base containers"
+            echo
+            echo "Starting docker-compose ..."
+            docker-compose -f ${SYSDATADIR}base/gothingsbase.yml up -d
+            echo "Done."
+}
+#
+##########################################################################
+#

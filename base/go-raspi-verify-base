@@ -1,0 +1,226 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI VERIFY FUNCTIONS
+                                                          verify-base-ver="0.01"
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+#===============================================================================
+#
+#  Sezione per verifiche di esistenza e congruita' della configurazione
+#    --> per dare affidabilita' alla esecuzione delle richieste di utente
+#
+#==============================================================================
+echo
+echo "    ----> go raspi verify base - v.${verify-base-ver}"
+echo "          verify software existence"
+echo "          define functions to verify software configuration"
+#
+##########################################################################
+#                             functions to verify mandatory pre-requisites
+#
+#
+##########################################################################
+functiontodo(){
+  # dichiarazione generica di funzione NON ancora realizzata
+  #
+  echo 
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "function $1:   TO DO"
+  echo -n "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  (hostname)
+}
+#
+##########################################################################
+verifygz() {
+  # verifica esistenza dell'archivio di configurazione della applicazione APPNAME
+  # se l'archivio e' stato scaricato si presume che l'applicazione sia stata installata
+  # se l'archivio non esiste, lo si scarica e lo si espande
+  # 
+  RETLEVEL=0 #-- si parte con 'tutto bene'
+  FILEBASEGZ="${APPNAME}dirs.tar.gz"           # deve esistere il file tar.gz in sysarchive
+  GITBR="gothings-raspi-apps/master/${APPNAME}"
+  PIDIRGZ=""
+  getgitfile "${FILEBASEGZ}" "$GITBR" "$PIDIRGZ"
+  if [[ $ITEXISTS -ne 1 ]]
+  then                             # SI INTERROMPE TUTTO se basedirs.tar.gz non esiste
+    stopmenu "${FILEBASEGZ}"  "file ${FILEBASEGZ} is essential for control menu"
+    return 66                      # interrommpere il menu principale
+  else
+    # il file .tar.gz esiste, proseguiamo cercando il file "marcatore"
+    
+    FILEMARK="${HOMEDIR}dockrepo/dockimages/base/base.dirs"
+    if [[ ! -s $FILEMARK ]]
+    then                            # il marcatore NON esiste, espandiamo basedirs.tar.gz
+      echo
+      echo "File ${FILEMARK} does not exists, try to expand ${FILEBASEGZ} ..."
+      echo
+      # sudo tar xpf $FILEGZ -v --show-transformed -C $3     <-- preserva permission & ownership
+      sudo tar xpf "${PIDIRGZ}${FILEBASEGZ}" -C $HOMEDIR
+      #  tar -xzvf "${PIDIRGZ}${FILEBASEGZ}" -C $HOMEDIR
+      DUMMY=$?
+      if [[ ! $DUMMY -eq 0 ]]
+      then
+        echo "tar returned: $DUMMY"
+        echo
+        stopmenu "${PIDIRGZ}${FILEBASEGZ}"  "tar returned: $DUMMY : file expantion failed"
+        return 66                      # interrommpere il menu principale
+      fi
+      echo "done."
+      sleep 4
+    fi
+    # verifichiamo esistenza file .yml
+    FILEMARK="${HOMEDIR}dockrepo/sysdata/base/gothingsbase.yml"
+    if [[ ! -s $FILEMARK ]]
+    then                           # il marcatore NON esiste, SI INTERROMPE TUTTO
+      DEBUGLOG="|| BASE files check | Essential file missing ||"
+      stopmenu "${FILEMARK}" "file ${FILEMARK} is essential for control menu"
+    return 66                      # interrommpere il menu principale
+    fi
+  fi
+  # se si arriva qui significa che i file 'base' sono installati
+  RETLEVEL=0
+  return ${RETLEVEL}
+}
+#
+##########################################################################
+verifyenv() {
+  #  Verifica che i file .env-* siano tutti aggiornati !!!!!
+  # ci si accerta che le password iniziali sul sito siano cambiate
+  #
+  # --> funzione prevista, non ancora realizzata!
+  #
+  echo
+  echo
+  echo "---------------------------------------------------------"
+  echo "Verify security environment on this computer"
+  echo
+  echo "Per ora e' una finzione ..."
+  echo "simulo che vada tutto bene!"
+  echo
+  echo "----- DA FARE -----"
+  echo
+  dots 1
+  echo
+  return 0
+}
+#
+##########################################################################
+verifyexpand() {
+
+  ####  orig: versione per Wordpress / MariaDB  -  generalizzazione da verificare
+  ####  this: generalizzazione per go-raspi
+
+  #
+  #  si verifica <appname>expand.json per vedere se l'espansione e' da fare,
+  #  ovvero se e' gia' fatta o non e' comunque necessaria:
+  #
+  #  ritorna 0 se l'operazione non ha prodotto errori
+  #          1 se ci sono stati errori ...
+  #
+  #  error details in:  .../github-gothings/README.github.gothings
+  #
+  #  il dir .../dockimages/<appname> DEVE contenere il file di configurazione <appname>expand.json
+  #  nello stesso dir sono eventualmente presenti i files <appname>expand.sh e <appname>dirs.tar.gz
+  #  TUTTE le info necessarie sono nel .json
+  #
+  local filejson status filetargz githubgzfile script temp debuglog nvar
+  filejson="${HOMEDIR}dockrepo/dockimages/${APPNAME}/${APPNAME}expand.json"
+  #
+  echo "    <-- configuration data read from ${filejson}"
+  temp=($(cat "${filejson}" | jq -r '.status,.filetargz,.githubgzfile,.script'))
+  # verifica che non ci siano null!!
+  echo "    <--       status: ${temp[0]}"
+  echo "    <--   filetar.gz: ${temp[1]}"
+  echo "    <-- githubgzfile: ${temp[2]}"
+  echo "    <--       script: ${temp[3]}"
+  # aggiusta le variabili, se necessario
+  nvar=0
+  status=${temp[0]}
+  json2string status
+  (( nvar += $? ))
+  filetargz=${temp[1]}
+  json2string filetargz
+  (( nvar += $? ))
+  githubgzfile=${temp[2]}
+  json2string githubgzfile
+  (( nvar += $? ))
+  if [[ "${nvar}" -ne 3 ]]; then
+    debuglog="ERROR 1 - JSON file ${filejson} returned some null values"
+    bugmessage ERROR 1 "    JSON returned invalid values"
+    return 1 #                                                                 ERROR 1: Invalid JSON
+  fi
+  echo "    <-- non-null variables: ${nvar}"
+  # verifica stringhe nulle
+  temp=$((${#temp} * ${#status} * ${#filetargz} * ${#githubgzfile}))
+  if [[ "${temp}" -eq 0 ]]; then
+    debuglog="ERROR 2 - JSON returned empty string"
+    bugmessage ERROR 2 "    JSON file ${filejson} returned empty string"
+    return 2 #                                                                 ERROR 2: Invalid JSON
+  fi
+  # valori apparentemente accettabili, andiamo avanti
+  echo "    <-- variable types OK"
+  filetargz="${HOMEDIR}${filetargz}"
+  echo "    <-- sysdata for ${DISPLAYNAME} environment read from ${filetargz}"
+  debuglog="|| verify expand |"
+  case "${status}" in
+    todo) #                                      expand archive .tar.gz
+      echo "    <--  expand to be done"
+      if [[ -s "${filetargz}" ]]; then # file exists and length > 0
+        debuglog="${debuglog}| ${filetargz} esiste |"
+      else #                             il file non esiste, proviamo a scaricarlo
+        debuglog="${debuglog}| ${filetargz} does not exist | download githubgzfile: ${githubgzfile} |"
+        wget -O "${filetargz}" "${githubgzfile}"
+        if [[ -s "${filetargz}" ]]; then
+          debuglog="${debuglog}| ${filetargz} trovato |" #  il file e' stato trovato e verra' espanso
+          echo "    <--  archive file exists"
+        else
+          debuglog="{$debuglog}| ${filetargz} introvabile |"
+          bugmessage ERROR 66 "    file not found"
+          return 66
+        fi
+      fi
+      echo "    <--  expand archive file"
+      sudo tar xpf "${filetargz}" -C "$HOMEDIR" #   si espande l'archivio
+      temp=$?
+      if [[ ! $temp -eq 0 ]]; then
+        debuglog="{$debuglog}| ${filetargz} expansion failed! - return: ${temp} | ERROR 66"
+        bugmessage ERROR 66 "    archive expansion failed"
+        return 66
+      fi
+      # espansione effettuata:  aggiorna il .json
+      echo
+      echo "    <-- expand OK, change .json status from 'todo' to 'done'"
+      echo "$(cat "${filejson}" | jq -r '.status |= "done"')" > "${filejson}.new"
+      temp=$?
+      echo "    <-- save existing file into 'old'"
+      cp -r "${filejson}"  "${filejson}.old"
+      echo "    <-- copy 'new' file onto ${APPNAME}expand.json"
+      cp -r "${filejson}.new"  "${filejson}"
+      echo -n "    <-- verify <appname>expand.json status :"
+      temp=($(cat ${filejson} | jq -r '.status'))
+      echo ${temp}
+      if [ "${temp}" != "done" ]; then
+        bugmessage WARNING 5 "    ERROR : can't update ${filejson} file"
+        return 5
+      fi
+      echo "    <-- .json status update OK"
+      echo "    ------------------------------"
+      ;;
+    done)
+      echo "    <-- expand not needed"
+      ;;
+    *)
+      bugmessage WARNING 3 "    ERROR 3 - JSON status value is invalid"
+      return 3
+      ;;
+  esac
+  return 0
+  echo "1- questo non verra' MAI stampato!"
+}
+
+#
+##########################################################################
+#

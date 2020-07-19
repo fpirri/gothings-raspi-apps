@@ -1,0 +1,174 @@
+#### file to be sourced
+#                                                                     2020-06-20
+#  GO RASPI MENU FUNCTONS
+                                                       menu-functions-ver="0.01"
+#
+#  richiamato da:   go-raspi
+#    Vedi doc in:   .../raspi-apps/README.raspi.apps
+#
+#
+#===============================================================================
+#
+#  Configurazione iniziale, generica, === per tutti
+#
+#==============================================================================
+echo
+echo "    ----> go raspi menu functions - v.${menu-functions-ver}"
+#
+##########################################################################
+#                                          functions called from main menu
+#
+#
+##########################################################################
+consoleexit() {
+  # RETURN to raspberry console
+  echo
+  echo
+  echo "Thank you for using GOTHINGS !"
+  echo
+  echo "Exiting ..."
+  sleep 2
+  exit 0
+}
+#
+##########################################################################
+showcontainers(){
+  #  Show docker containers in a concise format
+  #
+  local max count
+  max=10
+  count=15 # deve essere: count > max
+  while true; do
+    count=$((count+1))
+    if [[ count -ge max ]]; then
+      clear
+      count=0
+      showsubtitle "      SHOW all containers"
+      echo -en "\033[6;0H"
+    fi
+    docker ps -a --format "table {{.Names}}\\t{{.Image}}\\t{{.Status}}"
+    echo "----------------------------------------------------------------- ${count}   "
+    echo -n "                             Press any key to return at main menu                   "
+    echo -n "                                                                                    "
+    echo -en "\033[6;0H"
+    read -t 3 -N 1 input
+    if [ $? == 0 ]; then
+      echo -en "\033[20;0H"
+      echo "Back to main menu"
+      break 
+    fi
+  done
+}
+#
+##########################################################################
+terminal(){
+  # Apri un terminale in questa droplet
+  echo
+  echo "----------------------------------------------------------------"
+  echo "Open a terminal on this droplet"
+  echo "                                      <-- Type 'exit' to go back"
+  echo
+  bash
+  echo
+  echo " going back ..."
+  dots 1
+}
+#
+##########################################################################
+gothingsbase(){
+  # Initialize and install gothings base & applications
+  verifybase   # sottosistema BASE ri-verificato ad ogni chiamata di utente
+  # esegui menu applicazione base  
+  RIPETI=1
+  until [[ $RIPETI -gt 10 ]]
+    do
+      showsubtitle "         MANAGE:  GOTHINGS BASE containers"
+      echo "Please choose one of the options below:"
+      echo " 1) SHOW     all containers"
+      echo " 2) START    gothings BASE containers"
+      echo " 3) PAUSE    gothings BASE containers"
+      echo " 4) DESTROY  gothings BASE containers"
+      echo " 0) RETURN   to main menu"
+      read -rsp $'Your choice: ' -n 1 key
+      case $key in
+        1)  # SHOW all containers
+            showcontainers
+            RIPETI=1
+            ;;
+        2)  # START base subsystem
+            startbase
+            sleep 5
+            RIPETI=2
+            ;;
+        3)  # PAUSE base subsystem
+            echo
+            echo
+            echo "---------------------------------------------------------"
+            echo "Use docker-compose to STOP the base containers"
+            echo
+            echo "This operation will STOP your base containers"
+            echo "You can re-run them with the START operation."
+            echo "Permanent user data will NOT be destroyed"
+            read -rsp "Do you like to STOP base containers? [y/N] " -n 1 key
+            case "$key" in
+                [yY]) 
+                  echo
+                  echo "Using docker-compose to stop base containers ..."
+                  docker-compose -f ${SYSDATADIR}base/gothingsbase.yml stop
+                  echo
+                  echo "done."
+                  sleep 5
+                  ;;
+                *)
+                  echo
+                  echo "Back to choice"
+                  sleep 2
+                  ;;
+            esac
+            RIPETI=2
+            ;;
+        4)  # DESTROY base subsystem
+            echo
+            echo
+            echo "---------------------------------------------------------"
+            echo "Use docker-compose to STOP & DESTROY the base containers"
+            echo 
+            echo "------------------ ATTENTION, please,"
+            echo "This operation will STOP & DESTROY your running base containers !"
+            echo "Anyway you can re-create and run them with the START operation."
+            echo "Permanent user data will NOT be destroyed"
+            read -rsp "Do you like to STOP & DESTROY? [y/N] " -n 1 key
+            case "$key" in
+                [yY]) 
+                  echo
+                  echo "Using docker-compose to stop base containers ..."
+                  docker-compose -f ${SYSDATADIR}base/gothingsbase.yml down
+                  echo
+                  echo "done."
+                  sleep 5
+                  ;;
+                *)
+                  echo
+                  echo "Back to choice"
+                  sleep 2
+                  ;;
+            esac
+            RIPETI=3
+            ;;
+        0)  # si ritorna al controlmenu
+            echo "Ritorno ..."
+            RIPETI=99
+            ;;
+        *)  # altri caratteri:  RETURN to main menu
+            echo
+            echo "Invalid choice, returning to main menu ..."
+            sleep 3
+            RIPETI=98
+            ;;
+      esac
+    done
+  #
+}
+#
+##########################################################################
+#
