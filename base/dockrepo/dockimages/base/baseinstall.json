@@ -1,0 +1,5 @@
+{
+  "package": "base",
+   "status": "done",
+   "script": "dockrepo/sysdata/base/baseinstall.sh"
+}

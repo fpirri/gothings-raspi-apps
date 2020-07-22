@@ -2,6 +2,6 @@
   "package": "base",
   "status": "todo",
   "filetargz": "dockrepo/dockimages/base/basedirs.tar.gz",
-  "githubgzfile": "https://github.com/fpirri/gothings-cloud/blob/master/dockrepo/sysarchive/clouddirs.tar.gz?raw=true",
+  "githubgzfile": "https://github.com/fpirri/gothings-cloud/blob/master/dockrepo/sysarchive/basedirs.tar.gz?raw=true",
   "script": false
 }
